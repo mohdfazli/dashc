@@ -75,7 +75,7 @@
             <div id="status-dot" class="status-dot"></div>
             
             <p id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 text-lg">
-                Click "Start Camera" to begin.
+                Click "Start" to begin.
             </p>
         </div>
 
@@ -254,7 +254,7 @@
                 updateButtonState(btnStopCamera, true); // Camera is running, enable stop
                 updateButtonState(btnRecord, true);
                 
-                setStatusMessage('Camera is ready. Click "Start Recording" to capture video.', 'text-green-600');
+                setStatusMessage('Camera is ready. Click "Start".', 'text-green-600');
 
                 // Check for MediaRecorder support
                 if (!window.MediaRecorder) {
@@ -427,7 +427,7 @@
         // Initial state message: Ensure placeholder displays correctly initially
         window.onload = () => {
             videoPlaceholder.style.display = 'flex';
-            setStatusMessage('Click "Start Camera" to grant access and enable recording.');
+            setStatusMessage('Click "Start" to grant access and enable recording.');
         };
 
         function switchcam() {
