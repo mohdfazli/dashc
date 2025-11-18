@@ -232,7 +232,7 @@
                 // Request video and audio access
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
-                        facingMode: { exact: "environment" },
+                        facingMode: { exact: "user" },
                         width: { ideal: 1080 },
                         height: { ideal: 1920 },
                         aspectRatio: { ideal: 9 / 16 },
