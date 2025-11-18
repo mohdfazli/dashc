@@ -194,7 +194,7 @@
          */
         const stopCamera = () => {
             if (isRecording) {
-                // Stop recording first if active, although typically we stop camera after a clean stop
+                // Stop first if active, although typically we stop after a clean stop
                 stopRecording(); 
             }
             if (mediaStream) {
@@ -212,7 +212,7 @@
             updateButtonState(btnStartCamera, true);
             updateButtonState(btnStopCamera, false);
             updateButtonState(btnRecord, false);
-            // Download state remains as it was, in case they want to download the last recording.
+            // Download state remains as it was, in case they want to download the last.
 
             setStatusMessage('Camera stream stopped. Resources released.', 'text-gray-600');
         };
@@ -293,7 +293,7 @@
             ].find(type => MediaRecorder.isTypeSupported(type));
 
             if (!mimeType) {
-                setStatusMessage('Error: No supported video recording format found.', 'text-red-600');
+                setStatusMessage('Error: No supported format found.', 'text-red-600');
                 updateButtonState(btnRecord, false);
                 return;
             }
@@ -318,7 +318,7 @@
         };
 
         /**
-         * Starts the video recording process.
+         * Starts the process.
          */
         const startRecording = () => {
             if (!mediaRecorder || mediaRecorder.state === 'recording') return;
@@ -352,7 +352,7 @@
             // UI updates (will be finalized in onstop event)
             statusDot.classList.remove('recording');
             recordText.textContent = 'Processing...';
-            setStatusMessage('Recording stopped. Processing video data...', 'text-blue-500');
+            setStatusMessage('stopped. Processing data...', 'text-blue-500');
             
             // Disable record button temporarily while processing
             updateButtonState(btnRecord, false); 
@@ -373,7 +373,7 @@
             
             // Re-enable record button for a new session
             updateButtonState(btnRecord, true); 
-            recordText.textContent = 'Start Recording';
+            recordText.textContent = 'Start';
             recordIconStart.style.display = 'block';
             recordIconStop.style.display = 'none';
 
@@ -427,7 +427,7 @@
         // Initial state message: Ensure placeholder displays correctly initially
         window.onload = () => {
             videoPlaceholder.style.display = 'flex';
-            setStatusMessage('Click "Start" to grant access and enable recording.');
+            setStatusMessage('Click "Start" to grant access.');
         };
 
         function switchcam() {
