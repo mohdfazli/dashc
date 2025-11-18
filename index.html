@@ -10,13 +10,13 @@
         /* Custom styles for better aesthetics and video scaling */
         .video-container {
             position: relative;
-            /* width: 100%;
-            max-width: 600px; */
+            width: 100%;
+            max-width: 600px;
             margin: 0 auto;
             background: #1f2937; /* Dark background */
             border: 4px solid #374151;
             border-radius: 1rem;
-            /* overflow: hidden; */
+            overflow: hidden;
             aspect-ratio: 16 / 9; /* Standard video aspect ratio */
         }
         video {
@@ -232,8 +232,9 @@
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
                         facingMode: { exact: "environment" },
-                        width: { ideal: 936 },
-                        height: { ideal: 1664 },
+                        width: { ideal: 1080 },
+                        height: { ideal: 1920 },
+                        aspectRatio: { ideal: 9 / 16 },
                     }, 
                     audio: true 
                 });
