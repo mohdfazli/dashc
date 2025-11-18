@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Video Camera App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better aesthetics and video scaling */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1f2937; /* Dark background */
+            border: 4px solid #374151;
+            border-radius: 1rem;
+            overflow: hidden;
+            aspect-ratio: 16 / 9; /* Standard video aspect ratio */
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Hide videos by default until stream/recording is ready */
+        }
+        .live-video.active, .playback-video.active {
+            display: block;
+        }
+        .status-dot {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: none;
+            box-shadow: 0 0 10px rgba(252, 165, 165, 0.7);
+        }
+        .status-dot.recording {
+            display: block;
+            background-color: #ef4444; /* Red */
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+        /* Custom button styling for a professional look */
+        .action-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .action-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .disabled-button {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .disabled-button:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans antialiased">
+
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 md:p-8">
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-2 text-center">Video Capture Studio</h1>
+        <p class="text-center text-gray-500 mb-8">Record video and audio directly from your browser.</p>
+
+        <!-- Video Display Area -->
+        <div class="video-container mb-8">
+            <video id="live-video" class="live-video rounded-lg" autoplay playsinline muted></video>
+            <video id="playback-video" class="playback-video rounded-lg" controls></video>
+            <div id="status-dot" class="status-dot"></div>
+            
+            <p id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 text-lg">
+                Click "Start Camera" to begin.
+            </p>
+        </div>
+
+        <!-- Status Message -->
+        <p id="status-message" class="text-center mb-6 text-sm font-medium text-gray-600 h-6">
+            
+        </p>
+
+        <!-- Controls -->
+        <div class="flex flex-wrap justify-center gap-4">
+            
+            <!-- Start Camera Button -->
+            <button id="btn-start-camera" 
+                    class="action-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                    <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span>Start Camera</span>
+            </button>
+            
+            <!-- Stop Camera Button (New for resource cleanup) -->
+            <button id="btn-stop-camera" disabled 
+                    class="action-button disabled-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Stop Camera</span>
+            </button>
+
+            <!-- Record Toggle Button -->
+            <button id="btn-record" disabled 
+                    class="action-button disabled-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+                <svg id="record-icon-start" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM10 14a4 4 0 100-8 4 4 0 000 8z" clip-rule="evenodd" />
+                </svg>
+                <svg id="record-icon-stop" style="display:none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-7-9.5V11a2.5 2.5 0 002.5 2.5h9A2.5 2.5 0 0017 11V8.5a.5.5 0 011 0V11a3.5 3.5 0 01-3.5 3.5h-9A3.5 3.5 0 013 11V8.5a.5.5 0 011 0z" clip-rule="evenodd" />
+                </svg>
+                <span id="record-text">Start Recording</span>
+            </button>
+
+            <!-- Download Button -->
+            <button id="btn-download" disabled 
+                    class="action-button disabled-button bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Download Video
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const videoLive = document.getElementById('live-video');
+        const videoPlayback = document.getElementById('playback-video');
+        const btnStartCamera = document.getElementById('btn-start-camera');
+        const btnStopCamera = document.getElementById('btn-stop-camera'); // New element
+        const btnRecord = document.getElementById('btn-record');
+        const btnDownload = document.getElementById('btn-download');
+        const statusDot = document.getElementById('status-dot');
+        const statusMessage = document.getElementById('status-message');
+        const videoPlaceholder = document.getElementById('video-placeholder');
+        const recordText = document.getElementById('record-text');
+        const recordIconStart = document.getElementById('record-icon-start');
+        const recordIconStop = document.getElementById('record-icon-stop');
+
+        // State
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+
+        // --- Utility Functions ---
+
+        /**
+         * Updates the state of a button (disabled/enabled, style).
+         * @param {HTMLElement} buttonElement - The button to update.
+         * @param {boolean} enable - True to enable, false to disable.
+         */
+        const updateButtonState = (buttonElement, enable) => {
+            buttonElement.disabled = !enable;
+            if (enable) {
+                buttonElement.classList.remove('disabled-button');
+                buttonElement.classList.remove('bg-gray-400');
+            } else {
+                buttonElement.classList.add('disabled-button');
+            }
+        };
+
+        /**
+         * Displays a status message to the user.
+         * @param {string} message - The message to display.
+         * @param {string} color - Tailwind color class (e.g., 'text-green-600').
+         */
+        const setStatusMessage = (message, color = 'text-gray-600') => {
+            statusMessage.textContent = message;
+            statusMessage.className = `text-center mb-6 text-sm font-medium ${color} h-6`;
+        };
+
+        // --- Core Camera Functions ---
+        
+        /**
+         * Stops the media stream and cleans up resources.
+         */
+        const stopCamera = () => {
+            if (isRecording) {
+                // Stop recording first if active, although typically we stop camera after a clean stop
+                stopRecording(); 
+            }
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            
+            // Reset UI
+            videoLive.classList.remove('active');
+            videoPlayback.classList.remove('active');
+            // Show placeholder text
+            videoPlaceholder.style.display = 'flex'; 
+            
+            // Update button states
+            updateButtonState(btnStartCamera, true);
+            updateButtonState(btnStopCamera, false);
+            updateButtonState(btnRecord, false);
+            // Download state remains as it was, in case they want to download the last recording.
+
+            setStatusMessage('Camera stream stopped. Resources released.', 'text-gray-600');
+        };
+
+        /**
+         * Initializes the camera and audio stream.
+         */
+        const startCamera = async () => {
+            // 1. Ensure any existing stream is stopped before starting a new one
+            if (mediaStream) {
+                stopCamera();
+            }
+
+            setStatusMessage('Requesting camera access...');
+            try {
+                // Request video and audio access
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                    }, 
+                    audio: true 
+                });
+
+                // Display the live stream
+                videoLive.srcObject = mediaStream;
+                videoLive.onloadedmetadata = () => {
+                    videoLive.play();
+                };
+
+                // Update UI state
+                videoPlaceholder.style.display = 'none';
+                videoLive.classList.add('active');
+                videoPlayback.classList.remove('active');
+                
+                // Set button states
+                updateButtonState(btnStartCamera, false);
+                updateButtonState(btnStopCamera, true); // Camera is running, enable stop
+                updateButtonState(btnRecord, true);
+                
+                setStatusMessage('Camera is ready. Click "Start Recording" to capture video.', 'text-green-600');
+
+                // Check for MediaRecorder support
+                if (!window.MediaRecorder) {
+                    setStatusMessage('Error: MediaRecorder API not supported in this browser.', 'text-red-600');
+                    updateButtonState(btnRecord, false);
+                    return;
+                }
+                
+                // Initialize MediaRecorder (but don't start yet)
+                initializeMediaRecorder();
+
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                setStatusMessage(`Error: Could not access camera. Ensure permissions are granted. (${error.name})`, 'text-red-600');
+                
+                // Cleanup and reset state on error
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                }
+                updateButtonState(btnStartCamera, true); // Allow retry
+                updateButtonState(btnStopCamera, false);
+                updateButtonState(btnRecord, false);
+            }
+        };
+
+        /**
+         * Initializes the MediaRecorder instance and sets up event handlers.
+         */
+        const initializeMediaRecorder = () => {
+            // Find a supported MIME type
+            const mimeType = [
+                'video/webm;codecs=vp9', 
+                'video/webm;codecs=vp8', 
+                'video/webm', 
+                'video/mp4'
+            ].find(type => MediaRecorder.isTypeSupported(type));
+
+            if (!mimeType) {
+                setStatusMessage('Error: No supported video recording format found.', 'text-red-600');
+                updateButtonState(btnRecord, false);
+                return;
+            }
+
+            try {
+                mediaRecorder = new MediaRecorder(mediaStream, { mimeType: mimeType });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    handleRecordingStop();
+                };
+            } catch (error) {
+                 console.error('Error initializing MediaRecorder:', error);
+                 setStatusMessage('Error: Failed to initialize video recorder.', 'text-red-600');
+                 updateButtonState(btnRecord, false);
+            }
+        };
+
+        /**
+         * Starts the video recording process.
+         */
+        const startRecording = () => {
+            if (!mediaRecorder || mediaRecorder.state === 'recording') return;
+
+            recordedChunks = [];
+            // Use a short interval to gather data, ensuring chunks are captured
+            mediaRecorder.start(100); 
+            isRecording = true;
+
+            // UI updates
+            statusDot.classList.add('recording');
+            recordText.textContent = 'Stop Recording';
+            recordIconStart.style.display = 'none';
+            recordIconStop.style.display = 'block';
+            setStatusMessage('Recording started...', 'text-red-500');
+
+            updateButtonState(btnDownload, false); 
+            videoPlayback.classList.remove('active');
+            videoLive.classList.add('active'); 
+        };
+
+        /**
+         * Stops the video recording process.
+         */
+        const stopRecording = () => {
+            if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
+            
+            mediaRecorder.stop();
+            isRecording = false;
+
+            // UI updates (will be finalized in onstop event)
+            statusDot.classList.remove('recording');
+            recordText.textContent = 'Processing...';
+            setStatusMessage('Recording stopped. Processing video data...', 'text-blue-500');
+            
+            // Disable record button temporarily while processing
+            updateButtonState(btnRecord, false); 
+        };
+
+        /**
+         * Handles the final steps after recording has stopped (in mediaRecorder.onstop).
+         */
+        const handleRecordingStop = () => {
+            const mimeType = mediaRecorder.mimeType;
+            const blob = new Blob(recordedChunks, { type: mimeType });
+            const videoUrl = URL.createObjectURL(blob);
+
+            // Set up playback
+            videoPlayback.src = videoUrl;
+            videoLive.classList.remove('active');
+            videoPlayback.classList.add('active');
+            
+            // Re-enable record button for a new session
+            updateButtonState(btnRecord, true); 
+            recordText.textContent = 'Start Recording';
+            recordIconStart.style.display = 'block';
+            recordIconStop.style.display = 'none';
+
+            // Enable download button
+            updateButtonState(btnDownload, true);
+            
+            // Set download handler using the created blob
+            btnDownload.onclick = () => downloadVideo(blob, mimeType.split(';')[0].split('/')[1] || 'webm');
+
+            setStatusMessage('Video recorded successfully. You can play it back or download it.', 'text-green-600');
+        };
+
+        /**
+         * Handles downloading the video blob.
+         * @param {Blob} blob - The recorded video data blob.
+         * @param {string} extension - The file extension (e.g., 'webm').
+         */
+        const downloadVideo = (blob, extension) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `recording-${new Date().toISOString().replace(/[:.]/g, '-')}.${extension}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            setStatusMessage('Download started. Check your downloads folder.', 'text-blue-600');
+        };
+
+
+        // --- Event Listeners ---
+
+        btnStartCamera.addEventListener('click', startCamera);
+        
+        // New: Event listener for stopping the camera
+        btnStopCamera.addEventListener('click', stopCamera);
+
+        btnRecord.addEventListener('click', () => {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        });
+
+        // Global cleanup on page close (best effort)
+        window.addEventListener('beforeunload', () => {
+            stopCamera();
+        });
+
+        // Initial state message: Ensure placeholder displays correctly initially
+        window.onload = () => {
+            videoPlaceholder.style.display = 'flex';
+            setStatusMessage('Click "Start Camera" to grant access and enable recording.');
+        };
+
+    </script>
+</body>
+</html>
