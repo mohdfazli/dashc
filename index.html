@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,21 +15,28 @@
             /* width: 100%; */
             /* max-width: 600px; */
             margin: 0 auto;
-            background: #1f2937; /* Dark background */
+            background: #1f2937;
+            /* Dark background */
             border: 4px solid #374151;
             border-radius: 1rem;
             overflow: hidden;
-            aspect-ratio: 16 / 9; /* Standard video aspect ratio */
+            aspect-ratio: 16 / 9;
+            /* Standard video aspect ratio */
         }
+
         video {
             /* width: 100%;
             height: 100%;
             object-fit: cover; */
-            display: none; /* Hide videos by default until stream/recording is ready */
+            display: none;
+            /* Hide videos by default until stream/recording is ready */
         }
-        .live-video.active, .playback-video.active {
+
+        .live-video.active,
+        .playback-video.active {
             display: block;
         }
+
         .status-dot {
             position: absolute;
             top: 10px;
@@ -39,44 +47,62 @@
             display: none;
             box-shadow: 0 0 10px rgba(252, 165, 165, 0.7);
         }
+
         .status-dot.recording {
             display: block;
-            background-color: #ef4444; /* Red */
+            background-color: #ef4444;
+            /* Red */
             animation: pulse 1s infinite alternate;
         }
+
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.1); opacity: 1; }
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
         }
+
         /* Custom button styling for a professional look */
         .action-button {
             transition: all 0.2s ease-in-out;
         }
+
         .action-button:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
+
         .disabled-button {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         .disabled-button:hover {
             transform: none;
             box-shadow: none;
         }
     </style>
 </head>
+
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans antialiased">
-    <p>
-        <input type="number" id="frameRateInput" class="mb-4 p-2 border border-gray-300 rounded-md w-48">
-    </p>
+    <div class="flex flex-wrap gap-4 justify-center mb-4">
+        <input type="number" id="frameRateInput" placeholder="Frame Rate"
+            class="p-2 border border-gray-300 rounded-md w-32">
+        <input type="number" id="widthInput" placeholder="Width" class="p-2 border border-gray-300 rounded-md w-32">
+        <input type="number" id="heightInput" placeholder="Height" class="p-2 border border-gray-300 rounded-md w-32">
+    </div>
     <div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 md:p-8">
         <!-- Video Display Area -->
         <div class="video-container mb-8">
             <video id="live-video" class="live-video rounded-lg" autoplay playsinline muted></video>
             <video id="playback-video" class="playback-video rounded-lg" controls></video>
             <div id="status-dot" class="status-dot"></div>
-            
+
             <p id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 text-lg">
                 Click "Start" to begin.
             </p>
@@ -84,7 +110,7 @@
 
         <!-- Status Message -->
         <p id="status-message" class="text-center mb-6 text-sm font-medium text-gray-600 h-6">
-            
+
         </p>
 
         <!-- Controls -->
@@ -98,43 +124,55 @@
                 </svg>
                 <span>Switch Camera</span>
             </button> -->
-            
+
             <!-- Start Camera Button -->
-            <button id="btn-start-camera" 
-                    class="action-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+            <button id="btn-start-camera"
+                class="action-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                    <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                        d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                        clip-rule="evenodd" />
                 </svg>
                 <span>view</span>
             </button>
-            
+
             <!-- Stop Camera Button (New for resource cleanup) -->
-            <button id="btn-stop-camera" disabled 
-                    class="action-button disabled-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <button id="btn-stop-camera" disabled
+                class="action-button disabled-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>Stop</span>
             </button>
 
             <!-- Record Toggle Button -->
-            <button id="btn-record" disabled 
-                    class="action-button disabled-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
-                <svg id="record-icon-start" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM10 14a4 4 0 100-8 4 4 0 000 8z" clip-rule="evenodd" />
+            <button id="btn-record" disabled
+                class="action-button disabled-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+                <svg id="record-icon-start" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM10 14a4 4 0 100-8 4 4 0 000 8z"
+                        clip-rule="evenodd" />
                 </svg>
-                <svg id="record-icon-stop" style="display:none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-7-9.5V11a2.5 2.5 0 002.5 2.5h9A2.5 2.5 0 0017 11V8.5a.5.5 0 011 0V11a3.5 3.5 0 01-3.5 3.5h-9A3.5 3.5 0 013 11V8.5a.5.5 0 011 0z" clip-rule="evenodd" />
+                <svg id="record-icon-stop" style="display:none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm-7-9.5V11a2.5 2.5 0 002.5 2.5h9A2.5 2.5 0 0017 11V8.5a.5.5 0 011 0V11a3.5 3.5 0 01-3.5 3.5h-9A3.5 3.5 0 013 11V8.5a.5.5 0 011 0z"
+                        clip-rule="evenodd" />
                 </svg>
                 <span id="record-text">Start</span>
             </button>
 
             <!-- Download Button -->
-            <button id="btn-download" disabled 
-                    class="action-button disabled-button bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
+            <button id="btn-download" disabled
+                class="action-button disabled-button bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition duration-150 ease-in-out">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
                 </svg>
                 Download
             </button>
@@ -191,26 +229,26 @@
         };
 
         // --- Core Camera Functions ---
-        
+
         /**
          * Stops the media stream and cleans up resources.
          */
         const stopCamera = () => {
             if (isRecording) {
                 // Stop first if active, although typically we stop after a clean stop
-                stopRecording(); 
+                stopRecording();
             }
             if (mediaStream) {
                 mediaStream.getTracks().forEach(track => track.stop());
                 mediaStream = null;
             }
-            
+
             // Reset UI
             videoLive.classList.remove('active');
             videoPlayback.classList.remove('active');
             // Show placeholder text
-            videoPlaceholder.style.display = 'flex'; 
-            
+            videoPlaceholder.style.display = 'flex';
+
             // Update button states
             updateButtonState(btnStartCamera, true);
             updateButtonState(btnStopCamera, false);
@@ -232,12 +270,14 @@
             setStatusMessage('Requesting camera access...');
             try {
                 // Request video and audio access
-                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { exact: "environment" },
                         frameRate: { ideal: parseInt(document.getElementById('frameRateInput').value) || 10, max: parseInt(document.getElementById('frameRateInput').value) || 10 },
-                    }, 
-                    audio: true 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: true
                 });
 
                 // Display the live stream
@@ -250,12 +290,12 @@
                 videoPlaceholder.style.display = 'none';
                 videoLive.classList.add('active');
                 videoPlayback.classList.remove('active');
-                
+
                 // Set button states
                 updateButtonState(btnStartCamera, false);
                 updateButtonState(btnStopCamera, true); // Camera is running, enable stop
                 updateButtonState(btnRecord, true);
-                
+
                 setStatusMessage('Camera is ready. Click "Start".', 'text-green-600');
 
                 // Check for MediaRecorder support
@@ -264,14 +304,14 @@
                     updateButtonState(btnRecord, false);
                     return;
                 }
-                
+
                 // Initialize MediaRecorder (but don't start yet)
                 initializeMediaRecorder();
 
             } catch (error) {
                 console.error('Error accessing media devices:', error);
                 setStatusMessage(`Error: Could not access camera. Ensure permissions are granted. (${error.name})`, 'text-red-600');
-                
+
                 // Cleanup and reset state on error
                 if (mediaStream) {
                     mediaStream.getTracks().forEach(track => track.stop());
@@ -288,9 +328,9 @@
         const initializeMediaRecorder = () => {
             // Find a supported MIME type
             const mimeType = [
-                'video/webm;codecs=vp9', 
-                'video/webm;codecs=vp8', 
-                'video/webm', 
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8',
+                'video/webm',
                 'video/mp4'
             ].find(type => MediaRecorder.isTypeSupported(type));
 
@@ -313,9 +353,9 @@
                     handleRecordingStop();
                 };
             } catch (error) {
-                 console.error('Error initializing MediaRecorder:', error);
-                 setStatusMessage('Error: Failed to initialize video recorder.', 'text-red-600');
-                 updateButtonState(btnRecord, false);
+                console.error('Error initializing MediaRecorder:', error);
+                setStatusMessage('Error: Failed to initialize video recorder.', 'text-red-600');
+                updateButtonState(btnRecord, false);
             }
         };
 
@@ -327,7 +367,7 @@
 
             recordedChunks = [];
             // Use a short interval to gather data, ensuring chunks are captured
-            mediaRecorder.start(100); 
+            mediaRecorder.start(100);
             isRecording = true;
 
             // UI updates
@@ -337,9 +377,9 @@
             recordIconStop.style.display = 'block';
             setStatusMessage('started...', 'text-red-500');
 
-            updateButtonState(btnDownload, false); 
+            updateButtonState(btnDownload, false);
             videoPlayback.classList.remove('active');
-            videoLive.classList.add('active'); 
+            videoLive.classList.add('active');
         };
 
         /**
@@ -347,7 +387,7 @@
          */
         const stopRecording = () => {
             if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
-            
+
             mediaRecorder.stop();
             isRecording = false;
 
@@ -355,9 +395,9 @@
             statusDot.classList.remove('recording');
             recordText.textContent = 'Processing...';
             setStatusMessage('stopped. Processing data...', 'text-blue-500');
-            
+
             // Disable record button temporarily while processing
-            updateButtonState(btnRecord, false); 
+            updateButtonState(btnRecord, false);
         };
 
         /**
@@ -372,16 +412,16 @@
             videoPlayback.src = videoUrl;
             videoLive.classList.remove('active');
             videoPlayback.classList.add('active');
-            
+
             // Re-enable record button for a new session
-            updateButtonState(btnRecord, true); 
+            updateButtonState(btnRecord, true);
             recordText.textContent = 'Start';
             recordIconStart.style.display = 'block';
             recordIconStop.style.display = 'none';
 
             // Enable download button
             updateButtonState(btnDownload, true);
-            
+
             // Set download handler using the created blob
             btnDownload.onclick = () => downloadVideo(blob, mimeType.split(';')[0].split('/')[1] || 'webm');
 
@@ -409,7 +449,7 @@
         // --- Event Listeners ---
 
         btnStartCamera.addEventListener('click', startCamera);
-        
+
         // New: Event listener for stopping the camera
         btnStopCamera.addEventListener('click', stopCamera);
 
@@ -433,22 +473,23 @@
         };
 
         function switchcam() {
-          let video2 = document.querySelector('video');
-        
-          if(camposition == "front"){
-            camposition = "rear"
-            navigator.mediaDevices.getUserMedia(rear).
-            then((stream) => {video2.srcObject = stream});
-          }
-          else{
-            camposition = "front"
-            navigator.mediaDevices.getUserMedia(constraints).
-            then((stream) => {video2.srcObject = stream});
-          }
-        
-          
+            let video2 = document.querySelector('video');
+
+            if (camposition == "front") {
+                camposition = "rear"
+                navigator.mediaDevices.getUserMedia(rear).
+                    then((stream) => { video2.srcObject = stream });
+            }
+            else {
+                camposition = "front"
+                navigator.mediaDevices.getUserMedia(constraints).
+                    then((stream) => { video2.srcObject = stream });
+            }
+
+
         }
 
     </script>
 </body>
+
 </html>
