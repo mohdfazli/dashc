@@ -67,7 +67,9 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans antialiased">
-
+    <p>
+        <input type="number" id="frameRateInput" class="mb-4 p-2 border border-gray-300 rounded-md w-48">
+    </p>
     <div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 md:p-8">
         <!-- Video Display Area -->
         <div class="video-container mb-8">
@@ -233,7 +235,7 @@
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
                         facingMode: { exact: "environment" },
-                        frameRate: { ideal: 10, max: 10 },
+                        frameRate: { ideal: parseInt(document.getElementById('frameRateInput').value) || 10, max: parseInt(document.getElementById('frameRateInput').value) || 10 },
                     }, 
                     audio: true 
                 });
