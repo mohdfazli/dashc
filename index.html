@@ -233,7 +233,9 @@
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
                         facingMode: { exact: "environment" },
-                        frameRate: { ideal: 50, max: 60 }
+                        frameRate: { ideal: 50, max: 60 },
+                        width: { ideal: 4096 }, 
+                        height: { ideal: 2160 },
                     }, 
                     audio: true 
                 });
