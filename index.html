@@ -272,7 +272,7 @@
                 // Request video and audio access
                 mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        // facingMode: { exact: "environment" },
+                        facingMode: { exact: "user" },
                         frameRate: { ideal: parseInt(document.getElementById('frameRateInput').value) || 10, max: parseInt(document.getElementById('frameRateInput').value) || 10 },
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
