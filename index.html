@@ -90,6 +90,7 @@
 </head>
 
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans antialiased">
+    <div id="clock">00:00:00</div>
     <div class="flex flex-wrap gap-4 justify-center mb-4">
         <input type="number" id="frameRateInput" placeholder="Frame Rate"
             class="p-2 border border-gray-300 rounded-md w-32">
@@ -488,6 +489,31 @@
 
 
         }
+        function updateClock() {
+            const now = new Date();
+            
+            // Extract hours, minutes, and seconds
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+
+            // Add leading zeros (e.g., 05 instead of 5)
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            // Format the string
+            const timeString = `${hours}:${minutes}:${seconds}`;
+
+            // Update the HTML element
+            document.getElementById('clock').textContent = timeString;
+        }
+
+        // Run the function every 1000ms (1 second)
+        setInterval(updateClock, 1000);
+
+        // Run immediately on load so we don't wait 1 second for the first tick
+        updateClock();
 
     </script>
 </body>
