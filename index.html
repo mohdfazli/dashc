@@ -112,7 +112,7 @@
             <video id="live-video" class="live-video rounded-lg" autoplay playsinline muted></video>
             <video id="playback-video" class="playback-video rounded-lg" controls></video>
             <div id="status-dot" class="status-dot"></div>
-            <div id="clock">00:00:00</div>
+            
             <p id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 text-lg">
                 Click "Start" to begin.
             </p>
@@ -283,9 +283,10 @@
                 mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: { exact: "user" },
-                        frameRate: { ideal: parseInt(document.getElementById('frameRateInput').value) || 10, max: parseInt(document.getElementById('frameRateInput').value) || 10 },
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        // frameRate: { ideal: parseInt(document.getElementById('frameRateInput').value) || 10, max: parseInt(document.getElementById('frameRateInput').value) || 10 },
+                        frameRate: { 30 },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
                     },
                     audio: true
                 });
