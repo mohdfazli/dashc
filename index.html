@@ -17,6 +17,7 @@
             border-radius: 15px;
             background: #222;
         }
+
         /* Custom styles for better aesthetics and video scaling */
         .video-container {
             opacity: 0.01;
@@ -99,7 +100,7 @@
 </head>
 
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans antialiased">
-    
+
     <!-- <div class="flex flex-wrap gap-4 justify-center mb-4">
         <input type="number" id="frameRateInput" placeholder="Frame Rate"
             class="p-2 border border-gray-300 rounded-md w-32">
@@ -113,7 +114,7 @@
             <video id="live-video" class="live-video rounded-lg" autoplay playsinline muted></video>
             <video id="playback-video" class="playback-video rounded-lg" controls></video>
             <div id="status-dot" class="status-dot"></div>
-            
+
             <p id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 text-lg">
                 Click "Start" to begin.
             </p>
@@ -289,7 +290,13 @@
                         width: { ideal: 1920 },
                         height: { ideal: 1080 }
                     },
-                    audio: true
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 48000,
+                        channelCount: 2
+                    }
                 });
 
                 // Display the live stream
@@ -340,6 +347,8 @@
         const initializeMediaRecorder = () => {
             // Find a supported MIME type
             const mimeType = [
+                'video/webm;codecs=vp9,opus',
+                'video/webm;codecs=vp8,opus',
                 'video/webm;codecs=vp9',
                 'video/webm;codecs=vp8',
                 'video/webm',
@@ -353,7 +362,11 @@
             }
 
             try {
-                mediaRecorder = new MediaRecorder(mediaStream, { mimeType: mimeType });
+                mediaRecorder = new MediaRecorder(mediaStream, {
+                    mimeType: mimeType,
+                    audioBitsPerSecond: 128000,
+                    videoBitsPerSecond: 2500000
+                });
 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
@@ -502,7 +515,7 @@
         }
         function updateClock() {
             const now = new Date();
-            
+
             // Extract hours, minutes, and seconds
             let hours = now.getHours();
             let minutes = now.getMinutes();
